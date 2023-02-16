@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
   cout << "Server received: " << buffer << endl;
 
   freeaddrinfo(host_info_list);
-  close(socket_fd);
+
 
   return 0;
 }

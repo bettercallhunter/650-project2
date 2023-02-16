@@ -100,9 +100,6 @@ class Client {
             return -1;
         }  // if
 
-        const char *message = "hello mate";
-        send(socket_fd, message, strlen(message), 0);
-
         freeaddrinfo(host_info_list);
 
         return socket_fd;

@@ -5,6 +5,7 @@
 #include <cstring>
 #include <iostream>
 
+#include "potato.hpp"
 #include "server.hpp"
 
 using namespace std;
@@ -20,7 +21,19 @@ int main(int argc, char* argv[]) {
     Client Player;
     int socket_fd = Player.init(host, port);
     int id;
-    recv(socket_fd, &id, 10, 0);
+    int fd_left;
+    int fd_right;
+    Potato potato;
+
+    recv(socket_fd, &id, sizeof(id), 0);
     cout << "id is :" << id << endl;
+    recv(socket_fd, &fd_left, sizeof(fd_left), 0);
+    cout << "left fd is:" << fd_left << endl;
+    recv(socket_fd, &fd_right, sizeof(fd_right), 0);
+    cout << "right fd is:" << fd_right << endl;
+    recv(socket_fd, &potato, sizeof(potato), 0);
+    std::cout << potato.hops << endl;
+    // send(socket_fd, potato, sizeof(potato), 0);
+
     return 0;
 }
