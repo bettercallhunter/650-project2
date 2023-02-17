@@ -6,14 +6,25 @@
 #include <iostream>
 
 using namespace std;
-struct player_t {
+class Player {
+   public:
     int id;
-    int fd;
+    char hostname[512];
+    char port[512];
+
+   public:
+    void print() {
+        cout << "************* printing *****************" << endl;
+        std::cout << this->id << endl;
+        std::cout << this->hostname << endl;
+        std::cout << this->port << endl;
+        cout << "************* end printing *****************" << endl;
+    }
 };
-typedef struct player_t player;
+
 class Server {
    public:
-    int init(const char *port) {
+    int init(const char *port, char *new_port) {
         int status;
         int socket_fd;
         struct addrinfo host_info;
@@ -23,8 +34,12 @@ class Server {
         host_info.ai_family = AF_UNSPEC;
         host_info.ai_socktype = SOCK_STREAM;
         host_info.ai_flags = AI_PASSIVE;
-
-        status = getaddrinfo(hostname, port, &host_info, &host_info_list);
+        if (strcmp(port, "") == 0) {
+            port = NULL;
+            status = getaddrinfo(hostname, "0", &host_info, &host_info_list);
+        } else {
+            status = getaddrinfo(hostname, port, &host_info, &host_info_list);
+        }
         if (status != 0) {
             cerr << "Error: cannot get address info for host" << endl;
             cerr << "  (" << hostname << "," << port << ")" << endl;
@@ -56,8 +71,24 @@ class Server {
             return -1;
         }  // if
 
-        cout << "Waiting for connection on port " << port << endl;
+        // get port number
+        struct sockaddr_storage socket_addr;
+        socklen_t socket_addr_len = sizeof(socket_addr);
+        status = getsockname(socket_fd, (struct sockaddr *)&socket_addr, &socket_addr_len);
+        if (status == -1) {
+            cerr << "Error: cannot get socket name" << endl;
+            return -1;
+        }
+        char service[NI_MAXSERV];
+        status = getnameinfo((struct sockaddr *)&socket_addr, socket_addr_len, NULL, 0, service, NI_MAXSERV, NI_NUMERICSERV);
+        if (status == 0) {
+            cout << "Listening on port " << service << endl;
+        } else {
+            cerr << "Error: cannot get service name" << endl;
+        }
+        cout << "Waiting for connection on port " << service << endl;
 
+        strcpy(new_port, service);
         freeaddrinfo(host_info_list);
 
         return socket_fd;

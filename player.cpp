@@ -18,22 +18,36 @@ int main(int argc, char* argv[]) {
     }
     char* host = argv[1];
     char* port = argv[2];
-    Client Player;
-    int socket_fd = Player.init(host, port);
+    Client Player_client;
+    int socket_fd = Player_client.init(host, port);
+
     int id;
     int fd_left;
+    int fd_left_t;
     int fd_right;
     Potato potato;
-
     recv(socket_fd, &id, sizeof(id), 0);
     cout << "id is :" << id << endl;
-    recv(socket_fd, &fd_left, sizeof(fd_left), 0);
-    cout << "left fd is:" << fd_left << endl;
-    recv(socket_fd, &fd_right, sizeof(fd_right), 0);
-    cout << "right fd is:" << fd_right << endl;
-    recv(socket_fd, &potato, sizeof(potato), 0);
-    std::cout << potato.hops << endl;
-    // send(socket_fd, potato, sizeof(potato), 0);
+
+    Server player_server;
+    char new_port[512];
+    int player_server_fd = player_server.init("", new_port);
+    char name[512] = "";
+    gethostname(name, sizeof(name));
+    // store info in player, send it to master
+    Player player;
+    player.id = id;
+    strncpy(player.hostname, name, strlen(name));
+    strncpy(player.port, new_port, strlen(new_port));
+    send(socket_fd, &player, sizeof(Player), 0);
+    // receive info from master
+    Player left_player;
+    Player right_player;
+    recv(socket_fd, &left_player, sizeof(Player), 0);
+    recv(socket_fd, &right_player, sizeof(Player), 0);
+    // connect with left and right neighbor
+    int left_fd = Player_client.init(left_player.hostname, left_player.port);
+    int right_fd = Player_client.init(right_player.hostname, right_player.port);
 
     return 0;
 }

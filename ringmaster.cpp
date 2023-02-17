@@ -4,6 +4,8 @@
 
 #include <cstring>
 #include <iostream>
+#include <mutex>
+#include <string>
 #include <vector>
 
 #include "potato.hpp"
@@ -17,11 +19,16 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
     Server master;
+    char ptr[100];
     char* port = argv[1];
     int num_players = atoi(argv[2]);
     int num_hops = atoi(argv[3]);
-    int fd = master.init(port);
+    int fd = master.init(port, ptr);
     std::vector<int> fd_list;
+    std::vector<string> host_list;
+    std::vector<string> port_list;
+    std::vector<Player> player_list;
+    //connect with clinets
     for (int i = 0; i < num_players; i++) {
         struct sockaddr_storage socket_addr;
         socklen_t socket_addr_len = sizeof(socket_addr);
@@ -33,20 +40,25 @@ int main(int argc, char* argv[]) {
         }  // if
         fd_list.push_back(client_connection_fd);
 
-        int* id = &i;
-        send(client_connection_fd, id, sizeof(id), 0);
+        int id = i;
+        send(client_connection_fd, &id, sizeof(id), 0);
     }
-    for (int i = 0; i < fd_list.size(); i++) {
-        std::cout << fd_list[i] << endl;
-    }
+    //store players
     for (int i = 0; i < num_players; i++) {
-        size_t left_index = i > 0 ? (i - 1) % num_players : (i - 1 + num_players) % num_players;
-        size_t right_index = (i + 1) % num_players;
-        int* fd_left = &fd_list[left_index];
-        int* fd_right = &fd_list[right_index];
-        send(fd_list[i], fd_left, sizeof(fd_left), 0);
-        send(fd_list[i], fd_right, sizeof(fd_right), 0);
+        Player player;
+        recv(fd_list[i], &player, sizeof(Player), 0);
+        player_list.push_back(player);
     }
-    Potato potato(8);
-    send(fd_list[0], &potato, 10000, 0);
+    //send neighbor
+    for (int i = 0; i < num_players; i++) {
+        size_t left_index = (i - 1 + num_players) % num_players;
+        size_t right_index = (i + 1) % num_players;
+        Player left_player = player_list[left_index];
+        Player right_player = player_list[right_index];
+        send(fd_list[i], &left_player, sizeof(Player), 0);
+        send(fd_list[i], &right_player, sizeof(Player), 0);
+    }
+    
+    Potato potato(num_hops);
+    // send(fd_list[0], &potato, sizeof(potato), 0);
 }
