@@ -38,21 +38,26 @@ int main(int argc, char* argv[]) {
     // store info in player, send it to master
     Player player;
     player.id = id;
-    strncpy(player.hostname, name, strlen(name));
-    strncpy(player.port, new_port, strlen(new_port));
+    strcpy(player.hostname, name);
+
+    strcpy(player.port, new_port);
     send(socket_fd, &player, sizeof(Player), 0);
     // receive info from master
     Player left_player;
     Player right_player;
+    char leftport[512];
+    char lefthost[512];
+    int lenp;
+    int lenh;
+
     recv(socket_fd, &left_player, sizeof(Player), 0);
     recv(socket_fd, &right_player, sizeof(Player), 0);
-    // connect with left and right neighbor
 
-    std::cout << "left port is " << left_player.hostname << endl;
-    std::cout << strcmp(left_player.hostname, "Better-Call-Hunter.local") << endl;
+    std::cout << "left port is " << left_player.port << endl;
 
     Client Player_client_to_right;
-    int left_fd = Player_client_to_right.init("Better-Call-Hunter.local", left_player.port);
+
+    int left_fd = Player_client_to_right.init(left_player.hostname, left_player.port);
     // connect right
     // listen to left
     struct sockaddr_storage socket_addr;

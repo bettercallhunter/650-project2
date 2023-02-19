@@ -47,6 +47,7 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < num_players; i++) {
         Player player;
         recv(fd_list[i], &player, sizeof(Player), 0);
+        cout << "len is " << strlen(player.hostname) << endl;
         player_list.push_back(player);
     }
 
