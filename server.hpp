@@ -4,8 +4,10 @@
 
 #include <cstring>
 #include <iostream>
+#include <string>
 
 using namespace std;
+
 class Player {
    public:
     int id;
@@ -108,7 +110,7 @@ class Client {
 
         status = getaddrinfo(hostname, port, &host_info, &host_info_list);
         if (status != 0) {
-            cerr << "Error: cannot get address info for host" << endl;
+            cerr << "Error: cannot get address info for host (clinet side)" << endl;
             cerr << "  (" << hostname << "," << port << ")" << endl;
             return -1;
         }  // if

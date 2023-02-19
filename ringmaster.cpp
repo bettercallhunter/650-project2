@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
     std::vector<string> host_list;
     std::vector<string> port_list;
     std::vector<Player> player_list;
-    //connect with clinets
+    // connect with clinets
     for (int i = 0; i < num_players; i++) {
         struct sockaddr_storage socket_addr;
         socklen_t socket_addr_len = sizeof(socket_addr);
@@ -43,13 +43,14 @@ int main(int argc, char* argv[]) {
         int id = i;
         send(client_connection_fd, &id, sizeof(id), 0);
     }
-    //store players
+    // store players
     for (int i = 0; i < num_players; i++) {
         Player player;
         recv(fd_list[i], &player, sizeof(Player), 0);
         player_list.push_back(player);
     }
-    //send neighbor
+
+    // send neighbor
     for (int i = 0; i < num_players; i++) {
         size_t left_index = (i - 1 + num_players) % num_players;
         size_t right_index = (i + 1) % num_players;
@@ -58,7 +59,7 @@ int main(int argc, char* argv[]) {
         send(fd_list[i], &left_player, sizeof(Player), 0);
         send(fd_list[i], &right_player, sizeof(Player), 0);
     }
-    
+
     Potato potato(num_hops);
     // send(fd_list[0], &potato, sizeof(potato), 0);
 }

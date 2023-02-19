@@ -4,6 +4,7 @@
 
 #include <cstring>
 #include <iostream>
+#include <string>
 
 #include "potato.hpp"
 #include "server.hpp"
@@ -46,8 +47,31 @@ int main(int argc, char* argv[]) {
     recv(socket_fd, &left_player, sizeof(Player), 0);
     recv(socket_fd, &right_player, sizeof(Player), 0);
     // connect with left and right neighbor
-    int left_fd = Player_client.init(left_player.hostname, left_player.port);
-    int right_fd = Player_client.init(right_player.hostname, right_player.port);
+
+    std::cout << "left port is " << left_player.hostname << endl;
+    std::cout << strcmp(left_player.hostname, "Better-Call-Hunter.local") << endl;
+
+    Client Player_client_to_right;
+    int left_fd = Player_client_to_right.init("Better-Call-Hunter.local", left_player.port);
+    // connect right
+    // listen to left
+    struct sockaddr_storage socket_addr;
+    socklen_t socket_addr_len = sizeof(socket_addr);
+    int right_fd;
+    right_fd = accept(player_server_fd, (struct sockaddr*)&socket_addr, &socket_addr_len);
+    if (right_fd == -1) {
+        cerr << "Error: cannot accept connection on socket" << endl;
+        return -1;
+    }  // if
+    std::cout << "connected" << endl;
+    const char* message = "hello left";
+    send(left_fd, message, 11 * sizeof(char), 0);
+    cout << "send message:" << message << endl;
+    char buffer[512];
+    recv(right_fd, buffer, 11, 0);
+    buffer[11] = 0;
+
+    cout << "Server received: " << buffer << endl;
 
     return 0;
 }
