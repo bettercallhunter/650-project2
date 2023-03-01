@@ -23,12 +23,16 @@ int main(int argc, char* argv[]) {
     char* port = argv[1];
     int num_players = atoi(argv[2]);
     int num_hops = atoi(argv[3]);
-    int fd = master.init(port, ptr);
+    std::cout << "Potato Ringmaster" << endl;
+    std::cout << "Players = " << num_players << endl;
+    std::cout << "Hops = " << num_hops << endl;
+    int fd = master.init(ptr, port);
     std::vector<int> fd_list;
     std::vector<string> host_list;
     std::vector<string> port_list;
     std::vector<Player> player_list;
     // connect with clinets
+
     for (int i = 0; i < num_players; i++) {
         struct sockaddr_storage socket_addr;
         socklen_t socket_addr_len = sizeof(socket_addr);
@@ -42,12 +46,13 @@ int main(int argc, char* argv[]) {
 
         int id = i;
         send(client_connection_fd, &id, sizeof(id), 0);
+        send(client_connection_fd, &num_players, sizeof(int), 0);
+        std::cout << "Player " << id << " is ready to play" << endl;
     }
     // store players
     for (int i = 0; i < num_players; i++) {
         Player player;
         recv(fd_list[i], &player, sizeof(Player), 0);
-        cout << "len is " << strlen(player.hostname) << endl;
         player_list.push_back(player);
     }
 
@@ -60,7 +65,39 @@ int main(int argc, char* argv[]) {
         send(fd_list[i], &left_player, sizeof(Player), 0);
         send(fd_list[i], &right_player, sizeof(Player), 0);
     }
-
     Potato potato(num_hops);
-    // send(fd_list[0], &potato, sizeof(potato), 0);
+    srand(time(0));
+    int first_player = rand() % num_players;
+    if (num_hops != 0) {
+        std::cout << "Ready to start the game, sending potato to player " << first_player << endl;
+        send(fd_list[first_player], &potato, sizeof(potato), 0);
+        fd_set read_fds;
+        FD_ZERO(&read_fds);
+        int max_fd = fd_list[0];
+        for (int i = 0; i < num_players; i++) {
+            if (fd_list[i] > max_fd) {
+                max_fd = fd_list[i];
+            }
+            FD_SET(fd_list[i], &read_fds);
+        }
+
+        fd_set tmp_fds = read_fds;
+        if (select(max_fd + 1, &tmp_fds, NULL, NULL, NULL) == -1) {
+            cerr << "Error: select failed" << endl;
+            return -1;
+        }
+        for (int i = 0; i < num_players; i++) {
+            if (FD_ISSET(fd_list[i], &tmp_fds)) {
+                recv(fd_list[i], &potato, sizeof(Potato), 0);
+                break;
+            }
+        }
+
+        potato.printPath();
+    }
+    for (int i = 0; i < num_players; i++) {
+        close(fd_list[i]);
+    }
+    close(fd);
+    return 0;
 }

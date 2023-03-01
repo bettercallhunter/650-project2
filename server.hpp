@@ -26,7 +26,7 @@ class Player {
 
 class Server {
    public:
-    int init(const char *port, char *new_port) {
+    int init(char *new_port, const char *port="") {
         int status;
         int socket_fd;
         struct addrinfo host_info;
@@ -84,11 +84,11 @@ class Server {
         char service[NI_MAXSERV];
         status = getnameinfo((struct sockaddr *)&socket_addr, socket_addr_len, NULL, 0, service, NI_MAXSERV, NI_NUMERICSERV);
         if (status == 0) {
-            cout << "Listening on port " << service << endl;
+            // cout << "Listening on port " << service << endl;
         } else {
             cerr << "Error: cannot get service name" << endl;
         }
-        cout << "Waiting for connection on port " << service << endl;
+        // cout << "Waiting for connection on port " << service << endl;
 
         strcpy(new_port, service);
         freeaddrinfo(host_info_list);
@@ -124,7 +124,7 @@ class Client {
             return -1;
         }  // if
 
-        cout << "Connecting to " << hostname << " on port " << port << "..." << endl;
+        // cout << "Connecting to " << hostname << " on port " << port << "..." << endl;
 
         status = connect(socket_fd, host_info_list->ai_addr, host_info_list->ai_addrlen);
         if (status == -1) {
