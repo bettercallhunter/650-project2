@@ -1,3 +1,3 @@
 all:
-	g++ -o player player.cpp
-	g++ -o ringmaster ringmaster.cpp
+	g++ -ggdb3 -o player player.cpp
+	g++ -ggdb3 -o ringmaster ringmaster.cpp

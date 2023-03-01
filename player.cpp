@@ -128,9 +128,7 @@ int main(int argc, char* argv[]) {
                 potato.path[potato.index] = id;
                 potato.index++;
                 send(socket_fd, &potato, sizeof(Potato), 0);
-                close(left_fd);
-                close(right_fd);
-                close(socket_fd);
+
                 std::cout << "I'm it" << endl;
                 return 0;
             } else {
