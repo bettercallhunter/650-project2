@@ -23,6 +23,10 @@ int main(int argc, char* argv[]) {
     char* port = argv[1];
     int num_players = atoi(argv[2]);
     int num_hops = atoi(argv[3]);
+    if (num_players < 2) {
+        perror("invalid number player");
+        exit(EXIT_FAILURE);
+    }
     std::cout << "Potato Ringmaster" << endl;
     std::cout << "Players = " << num_players << endl;
     std::cout << "Hops = " << num_hops << endl;
@@ -95,7 +99,11 @@ int main(int argc, char* argv[]) {
 
         potato.printPath();
     }
+
+    Potato endingPotato;
+    endingPotato.index = -1;
     for (int i = 0; i < num_players; i++) {
+        send(fd_list[i], &endingPotato, sizeof(Potato), 0);
         close(fd_list[i]);
     }
     close(fd);

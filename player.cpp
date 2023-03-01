@@ -17,6 +17,7 @@ int main(int argc, char* argv[]) {
         perror("invalid input");
         return EXIT_FAILURE;
     }
+
     char* host = argv[1];
     char* port = argv[2];
     Client Player_client;
@@ -24,6 +25,7 @@ int main(int argc, char* argv[]) {
 
     int id;
     int num_players;
+
     int fd_left;
     int fd_left_t;
     int fd_right;
@@ -92,28 +94,37 @@ int main(int argc, char* argv[]) {
             return -1;
         }
         if (FD_ISSET(left_fd, &tmp_fds)) {
-            if (recv(left_fd, &potato, sizeof(Potato), 0) == 0) {
-                return 0;
-            }
+            // if (recv(left_fd, &potato, sizeof(Potato), 0) == 0) {
+            //     return 0;
+            // }
+            recv(left_fd, &potato, sizeof(Potato), 0);
             // std::cout << "receive potato from left, hops is " << potato.hops << endl;
             hasPotato = 1;
         } else if (FD_ISSET(right_fd, &tmp_fds)) {
-            if (recv(right_fd, &potato, sizeof(Potato), 0) == 0) {
-                return 0;
-            };
+            // if (recv(right_fd, &potato, sizeof(Potato), 0) == 0) {
+            //     return 0;
+            // };
+            recv(right_fd, &potato, sizeof(Potato), 0);
             // std::cout << "receive potato from right, hops is " << potato.hops << endl;
             hasPotato = 1;
         } else if (FD_ISSET(socket_fd, &tmp_fds)) {
-            if (recv(socket_fd, &potato, sizeof(Potato), 0) == 0) {
-                return 0;
-            }
+            // if (recv(socket_fd, &potato, sizeof(Potato), 0) == 0) {
+            //     return 0;
+            // }
+            recv(socket_fd, &potato, sizeof(Potato), 0);
 
             // std::cout << "receive potato from server, hops is " << potato.hops << endl;
             hasPotato = 1;
         }
         // receiving potato
         if (hasPotato == 1) {
-            if (potato.hops <= 0) {
+            if (potato.index == -1) {
+                close(left_fd);
+                close(right_fd);
+                close(socket_fd);
+                return 0;
+            }
+            if (potato.hops <= 1) {
                 potato.path[potato.index] = id;
                 potato.index++;
                 send(socket_fd, &potato, sizeof(Potato), 0);
@@ -123,7 +134,7 @@ int main(int argc, char* argv[]) {
                 std::cout << "I'm it" << endl;
                 return 0;
             } else {
-                if (potato.hops <= 0) {
+                if (potato.hops <= 1) {
                     return 0;
                 }
                 potato.hops -= 1;
@@ -142,7 +153,7 @@ int main(int argc, char* argv[]) {
                     // std::cout << "send to the right" << endl;
                 }
                 hasPotato = 0;
-                std::cout << "send potato to " << next_id << endl;
+                std::cout << "Sending potato to " << next_id << endl;
             }
         }
     }

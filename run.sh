@@ -1,9 +1,9 @@
 #!/bin/bash
 osascript -e 'tell app "Terminal"
-    do script "~/Repository/650-project3/ringmaster 5000 5 0"
+    do script "~/Repository/650-project3/ringmaster 5000 2 10"
 end tell'
 sleep 1
-for (( c=0; c<5; c++ ))
+for (( c=0; c<2; c++ ))
 do
 sleep 1
 osascript -e 'tell app "Terminal"

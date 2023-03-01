@@ -26,7 +26,7 @@ class Player {
 
 class Server {
    public:
-    int init(char *new_port, const char *port="") {
+    int init(char *new_port, const char *port = "") {
         int status;
         int socket_fd;
         struct addrinfo host_info;
